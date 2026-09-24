@@ -32,13 +32,9 @@ Ouvrir `index.html` dans un navigateur, ou `npx serve .`
 
 ## Déployer
 
-Hébergé sur Netlify (projet `compagnie-cliffhanger`). Pour l'instant, déploiement manuel :
+Le lien Netlify (`compagnie-cliffhanger.netlify.app`) sert **uniquement de démo** pour montrer le projet à la compagnie. L'hébergement définitif est au choix du dev. Pour mettre la démo à jour : `npx netlify-cli deploy --prod --dir .`
 
-```
-npx netlify-cli deploy --prod --dir .
-```
-
-À faire : relier ce dépôt au projet Netlify (Project configuration → Build & deploy → Link repository) pour que chaque push sur `main` soit mis en ligne automatiquement.
+**Pour le design, la référence est le Figma** (page « V2 — style Chaliwaté » et page « Guide dev » : couleurs, typos, espacements, composants, animations chiffrées). Le prototype fait foi pour les contenus et les animations.
 
 ## Pistes pour la vraie version
 
