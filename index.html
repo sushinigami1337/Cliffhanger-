@@ -240,7 +240,7 @@ select.pill option{background:var(--back);color:var(--front)}
 
 <script>
 /* =========================================================================
-   CONTENU — tout le texte du site est ici.
+   CONTENU : tout le texte du site est ici.
    Un champ vide (null / absent) n'est jamais affiché.
    ========================================================================= */
 const CONTACT = {
@@ -273,7 +273,7 @@ const SHOWS = [
     ],
   },
   {
-    slug: "un-choeur-silencieux", title: "Un C(h)œur silencieux", year: 2025, by: "Collectif Cliffhanger — Montréal",
+    slug: "un-choeur-silencieux", title: "Un C(h)œur silencieux", year: 2025, by: "Collectif Cliffhanger de Montréal",
     hero: "choeur-duo", focus: "50% 40%", credit: null,
     punch: "Quand tout n'est plus que bruit, notre musique peut-elle encore vibrer ?",
     poster: "affiche-choeur",
@@ -376,9 +376,11 @@ const fmtTime = t => t ? t.replace(":", "h") : "";
 function fmtRange(a, b){
   if (a === b) return fmtDay(a);
   const A = dayParts(a), B = dayParts(b);
-  if (A.year !== B.year) return `${fmtDay(a)} – ${fmtDay(b)}`;
-  if (A.month !== B.month) return `${A.day} ${A.month} – ${B.day} ${B.month} ${B.year}`;
-  return `${A.day} – ${B.day} ${B.month} ${B.year}`;
+  const days = Math.round((new Date(b) - new Date(a)) / 864e5);
+  const joint = days === 1 ? "et" : "au"; // "17 et 18 avr." for two nights, "24 au 26 mai" for a longer run
+  if (A.year !== B.year) return `${fmtDay(a)} ${joint} ${fmtDay(b)}`;
+  if (A.month !== B.month) return `${A.day} ${A.month} ${joint} ${B.day} ${B.month} ${B.year}`;
+  return `${A.day} ${joint} ${B.day} ${B.month} ${B.year}`;
 }
 const place = d => [d.venue, d.city].filter(Boolean).join(", ");
 
@@ -397,7 +399,7 @@ function runs(){
 /* =========================================================================
    GABARITS
    ========================================================================= */
-const footer = (pinned = false) => `<p class="foot${pinned ? " foot--pinned" : ""}">© ${new Date().getFullYear()} Compagnie Cliffhanger — Bruxelles · Montréal</p>`;
+const footer = (pinned = false) => `<p class="foot${pinned ? " foot--pinned" : ""}">© ${new Date().getFullYear()} Compagnie Cliffhanger · Bruxelles · Montréal</p>`;
 
 function backdrop(base, tone = ""){
   return `<div class="bgs ${tone}" aria-hidden="true">
@@ -415,7 +417,7 @@ function datesTable(rows){
 }
 
 /* =========================================================================
-   PAGES — chaque fonction remplit `view` et renvoie le titre de l'onglet
+   PAGES : chaque fonction remplit `view` et renvoie le titre de l'onglet
    ========================================================================= */
 const pages = {
   home(view){
@@ -437,10 +439,10 @@ const pages = {
     view.innerHTML = `<article>
       <header class="phead">
         <figure><img class="js-hero" src="${img(s.hero)}" alt="${esc(s.title)}" style="object-position:${s.focus}"></figure>
-        <hgroup><h1 class="title title--xl" translate="no">${esc(s.title)}</h1><p>${esc(s.by)} — ${s.year}</p></hgroup>
+        <hgroup><h1 class="title title--xl" translate="no">${esc(s.title)}</h1><p>${esc(s.by)} · ${s.year}</p></hgroup>
         ${s.credit ? `<figcaption>© ${esc(s.credit)}</figcaption>` : ""}
       </header>
-      <div class="section wrap"><blockquote class="punch"><p>${esc(s.punch)}</p>${s.cite ? `<cite>— ${esc(s.cite)}</cite>` : ""}</blockquote></div>
+      <div class="section wrap"><blockquote class="punch"><p>${esc(s.punch)}</p>${s.cite ? `<cite>${esc(s.cite)}</cite>` : ""}</blockquote></div>
       ${s.poster ? `<div class="section wrap wrap--wide"><figure class="wide"><img src="${img(s.poster)}" alt="Affiche de ${esc(s.title)}" loading="lazy"></figure></div>` : ""}
       <div class="section wrap"><div class="prose prose--justify">${s.text.map(p => `<p>${esc(p)}</p>`).join("")}</div></div>
       <div class="section slider">
@@ -450,7 +452,7 @@ const pages = {
       <div class="section wrap"><div class="infos">${info.map(([k, v]) => `<p><b>${esc(k)} :</b> ${esc(v)}</p>`).join("")}</div>
         ${s.pdf ? `<p class="section"><a href="${esc(s.pdf)}">Dossier de diffusion (PDF)</a></p>` : ""}</div>
       <div class="section wrap"><h2 class="label">${upcoming ? "À venir" : "Représentations"}</h2>
-        ${datesTable(s.dates.map(d => `<tr><td>${fmtDay(d.day)}${d.time ? ` — ${fmtTime(d.time)}` : ""}</td><td>${esc(place(d))}</td><td>${esc(d.price || "")}</td><td>${esc(d.country)}</td></tr>`))}
+        ${datesTable(s.dates.map(d => `<tr><td>${fmtDay(d.day)}${d.time ? `, ${fmtTime(d.time)}` : ""}</td><td>${esc(place(d))}</td><td>${esc(d.price || "")}</td><td>${esc(d.country)}</td></tr>`))}
         <a class="back" href="#/spectacles">← Tous les spectacles</a></div>
       ${footer()}</article>`;
     const track = view.querySelector(".js-track");
@@ -498,7 +500,7 @@ const pages = {
     view.innerHTML = `<article>
       <header class="phead">
         <figure><img class="js-hero" src="${img(BACKDROPS.compagnie)}" alt="Un comédien en chemise rouge, sur scène" style="object-position:60% 35%"></figure>
-        <hgroup><h1 class="title title--xl">La compagnie</h1><p>Bruxelles · Montréal — depuis 2018</p></hgroup>
+        <hgroup><h1 class="title title--xl">La compagnie</h1><p>Bruxelles · Montréal, depuis 2018</p></hgroup>
       </header>
       <div class="section wrap"><p class="punch">Des spectacles inédits et originaux, et 1001 sensations. Car la Compagnie Cliffhanger, c'est une histoire sans fin.</p></div>
       <div class="section wrap"><div class="prose prose--justify">
@@ -619,7 +621,7 @@ burger.addEventListener("click", () => {
 const lightbox = (() => {
   const box = document.getElementById("lightbox"), pic = document.getElementById("lbImg"), cap = document.getElementById("lbCap");
   let set = [], pos = 0, returnTo = null;
-  const draw = () => { const g = GALLERY[set[pos]]; pic.src = img(g[0]); pic.alt = g[1]; cap.textContent = `${g[1]} — ${pos + 1} / ${set.length}`; };
+  const draw = () => { const g = GALLERY[set[pos]]; pic.src = img(g[0]); pic.alt = g[1]; cap.textContent = `${g[1]} · ${pos + 1} / ${set.length}`; };
   const step = d => { pos = (pos + d + set.length) % set.length; draw(); };
   document.getElementById("lbClose").addEventListener("click", () => api.close());
   document.getElementById("lbPrev").addEventListener("click", () => step(-1));
@@ -645,7 +647,7 @@ document.addEventListener("keydown", e => {
 });
 
 /* =========================================================================
-   NAVIGATION — the old page stays frozen underneath while the new one fades in
+   NAVIGATION: the old page stays frozen underneath while the new one fades in
    ========================================================================= */
 const host = document.getElementById("app");
 history.scrollRestoration = "manual";
@@ -667,7 +669,7 @@ function route(){
   host.appendChild(view);
   const pageTitle = render(view, param);
   if (!view.firstChild) return; // redirected
-  document.title = pageTitle ? `${pageTitle} — Compagnie Cliffhanger` : "Compagnie Cliffhanger";
+  document.title = pageTitle ? `${pageTitle} · Compagnie Cliffhanger` : "Compagnie Cliffhanger";
   document.querySelectorAll(".menu a").forEach(a => a.toggleAttribute("aria-current", a.getAttribute("href") === `#/${name}`));
   document.querySelector(".menu a[aria-current]")?.setAttribute("aria-current", "page");
   scrollTo(0, 0);

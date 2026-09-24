@@ -3,7 +3,7 @@
 Site vitrine de la Compagnie Cliffhanger, compagnie de théâtre entre Bruxelles et Montréal.
 
 - **En ligne (prototype) :** https://compagnie-cliffhanger.netlify.app
-- **Maquettes Figma :** https://www.figma.com/design/vP8Z0mWn7ytbZk3IoL3Z6u (page « V2 — style Chaliwaté »)
+- **Maquettes Figma :** https://www.figma.com/design/vP8Z0mWn7ytbZk3IoL3Z6u (page « V2 · style Chaliwaté »)
 - **Référence de style :** https://www.focusandchaliwate.be/fr
 
 ## Structure
@@ -34,7 +34,7 @@ Ouvrir `index.html` dans un navigateur, ou `npx serve .`
 
 Le lien Netlify (`compagnie-cliffhanger.netlify.app`) sert **uniquement de démo** pour montrer le projet à la compagnie. L'hébergement définitif est au choix du dev. Pour mettre la démo à jour : `npx netlify-cli deploy --prod --dir .`
 
-**Pour le design, la référence est le Figma** (page « V2 — style Chaliwaté » et page « Guide dev » : couleurs, typos, espacements, composants, animations chiffrées). Le prototype fait foi pour les contenus et les animations.
+**Pour le design, la référence est le Figma** (page « V2 · style Chaliwaté » et page « Guide dev » : couleurs, typos, espacements, composants, animations chiffrées). Le prototype fait foi pour les contenus et les animations.
 
 ## Pistes pour la vraie version
 
