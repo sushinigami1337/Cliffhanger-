@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=Jost:wght@300;400;500&display=swap">
+<link rel="preload" as="image" href="img/groupe.webp" imagesrcset="img/groupe-960.webp 960w, img/groupe.webp 2048w" imagesizes="100vw" fetchpriority="high">
 <style>
 /* ---------- base ---------- */
 *,*::before,*::after{box-sizing:border-box}
@@ -102,6 +103,17 @@ img{display:block;max-width:100%}
 .phead hgroup{position:absolute;left:0;bottom:0;z-index:2;max-width:100%;padding:1rem;opacity:.75}
 .phead hgroup p{margin-top:.25rem;font-size:clamp(1rem,2.5vw,1.5rem)}
 .phead figcaption{position:absolute;right:0;bottom:0;z-index:2;padding:1rem;font-size:.875rem;opacity:.8}
+/* scroll hint: a thin line with a light running down it, gone as soon as you scroll */
+.hint{position:absolute;right:1rem;bottom:1rem;z-index:2;display:flex;flex-direction:column;align-items:center;gap:.6rem;font-size:.8125rem;font-weight:400;letter-spacing:.25em;text-transform:uppercase;opacity:.9;transition:opacity .4s ease}
+.hint:hover,.hint:focus-visible{opacity:1}
+.hint__line{position:relative;width:1px;height:4rem;overflow:hidden;background:rgba(255,255,255,.45)}
+.hint__line::after{content:"";position:absolute;left:0;top:-40%;width:100%;height:40%;background:var(--front);animation:drip 2s var(--ease-out) infinite}
+@keyframes drip{from{top:-40%}to{top:100%}}
+.hint--gone{opacity:0;pointer-events:none}
+.phead figcaption + .hint,.phead .hint:has(+ figcaption){bottom:3rem}
+@media (min-width:48em){.hint{right:auto;left:50%;transform:translateX(-50%)}}
+@media (max-width:47.99em){.phead hgroup{padding-right:4.5rem}}
+.hint > *{animation:fadein 1s ease 1s both}
 
 .wrap{width:100%;max-width:56rem;margin-inline:auto;padding-inline:var(--spacing)}
 .wrap--wide{max-width:96rem}
@@ -363,7 +375,22 @@ const BACKDROPS = { home: "groupe", spectacles: "rose", agenda: "script", compag
 /* =========================================================================
    OUTILS
    ========================================================================= */
-const img = name => `img/${name}.jpg`;
+// intrinsic sizes of the photos in img/ (width, height), used for srcset and to reserve space
+const DIMS = { "affiche-choeur": [1080, 1531], "affiche-fsv": [741, 970], "affiche-inedit-2": [322, 462], "affiche-inedit": [800, 999], "affiche-par-endroits": [846, 1066], "bleu": [1080, 1587], "choeur-chemise": [2000, 1333], "choeur-duo": [2000, 1333], "choeur-jean": [1200, 1800], "groupe": [2048, 1365], "noir-blanc": [1197, 1800], "pull": [726, 1052], "rose": [1222, 2048], "script": [1080, 1616], "sourire": [1200, 1800], "trio": [1080, 1307], "vert": [1200, 1800] };
+
+// <img> with a WebP srcset (960 px for phones, full size for large screens) and real dimensions
+function pic(name, { alt = "", sizes = "100vw", eager = false, cls = "", style = "", deferred = false } = {}){
+  const [w, h] = DIMS[name];
+  const set = w > 960 ? `img/${name}-960.webp 960w, img/${name}.webp ${w}w` : `img/${name}.webp ${w}w`;
+  const load = eager ? `fetchpriority="high"` : deferred ? "" : `loading="lazy"`;
+  const src = deferred ? `data-srcset="${set}" data-src="img/${name}.jpg"` : `srcset="${set}" src="img/${name}.jpg"`;
+  return `<img ${cls ? `class="${cls}" ` : ""}${src} sizes="${sizes}" width="${w}" height="${h}" alt="${esc(alt)}" ${load} decoding="async"${style ? ` style="${style}"` : ""}>`;
+}
+// fetch the hover backdrops once the page is idle, so hovering a title shows its photo instantly
+function warm(scope){
+  const go = () => scope.querySelectorAll("img[data-srcset]").forEach(i => { i.srcset = i.dataset.srcset; i.src = i.dataset.src; i.removeAttribute("data-srcset"); });
+  "requestIdleCallback" in window ? requestIdleCallback(go, { timeout: 2500 }) : setTimeout(go, 1200);
+}
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const bySlug = slug => SHOWS.find(s => s.slug === slug);
 const today = () => new Date().toISOString().slice(0, 10);
@@ -403,8 +430,8 @@ const footer = (pinned = false) => `<p class="foot${pinned ? " foot--pinned" : "
 
 function backdrop(base, tone = ""){
   return `<div class="bgs ${tone}" aria-hidden="true">
-    <figure><img src="${img(base)}" alt=""></figure>
-    ${SHOWS.map(s => `<figure class="bg" data-for="${s.slug}"><img src="${img(s.hero)}" alt="" loading="lazy" style="object-position:${s.focus}"></figure>`).join("")}
+    <figure>${pic(base, { eager: true })}</figure>
+    ${SHOWS.map(s => `<figure class="bg" data-for="${s.slug}">${pic(s.hero, { deferred: true, style: `object-position:${s.focus}` })}</figure>`).join("")}
   </div>`;
 }
 
@@ -438,15 +465,16 @@ const pages = {
     const info = [...s.credits, ...(s.duration ? [["Durée", s.duration]] : [])];
     view.innerHTML = `<article>
       <header class="phead">
-        <figure><img class="js-hero" src="${img(s.hero)}" alt="${esc(s.title)}" style="object-position:${s.focus}"></figure>
+        <figure>${pic(s.hero, { alt: s.title, eager: true, cls: "js-hero", style: `object-position:${s.focus}` })}</figure>
+        <button class="hint js-hint" type="button" aria-label="Voir la suite"><span>Découvrir</span><span class="hint__line" aria-hidden="true"></span></button>
         <hgroup><h1 class="title title--xl" translate="no">${esc(s.title)}</h1><p>${esc(s.by)} · ${s.year}</p></hgroup>
         ${s.credit ? `<figcaption>© ${esc(s.credit)}</figcaption>` : ""}
       </header>
       <div class="section wrap"><blockquote class="punch"><p>${esc(s.punch)}</p>${s.cite ? `<cite>${esc(s.cite)}</cite>` : ""}</blockquote></div>
-      ${s.poster ? `<div class="section wrap wrap--wide"><figure class="wide"><img src="${img(s.poster)}" alt="Affiche de ${esc(s.title)}" loading="lazy"></figure></div>` : ""}
+      ${s.poster ? `<div class="section wrap wrap--wide"><figure class="wide">${pic(s.poster, { alt: `Affiche de ${s.title}`, sizes: "(max-width: 56rem) 100vw, 50vw" })}</figure></div>` : ""}
       <div class="section wrap"><div class="prose prose--justify">${s.text.map(p => `<p>${esc(p)}</p>`).join("")}</div></div>
       <div class="section slider">
-        <div class="slider__items js-track">${s.slides.map(([f, alt]) => `<figure class="slide"><img src="${img(f)}" alt="${esc(alt)}" loading="lazy"></figure>`).join("")}</div>
+        <div class="slider__items js-track">${s.slides.map(([f, alt]) => `<figure class="slide">${pic(f, { alt, sizes: "(max-width: 40em) 90vw, 45vw" })}</figure>`).join("")}</div>
         ${s.slides.length > 1 ? `<div class="slider__nav"><button data-dir="-1" aria-label="Photo précédente">‹</button><button data-dir="1" aria-label="Photo suivante">›</button></div>` : ""}
       </div>
       <div class="section wrap"><div class="infos">${info.map(([k, v]) => `<p><b>${esc(k)} :</b> ${esc(v)}</p>`).join("")}</div>
@@ -499,7 +527,8 @@ const pages = {
   compagnie(view){
     view.innerHTML = `<article>
       <header class="phead">
-        <figure><img class="js-hero" src="${img(BACKDROPS.compagnie)}" alt="Un comédien en chemise rouge, sur scène" style="object-position:60% 35%"></figure>
+        <figure>${pic(BACKDROPS.compagnie, { alt: "Un comédien en chemise rouge, sur scène", eager: true, cls: "js-hero", style: "object-position:60% 35%" })}</figure>
+        <button class="hint js-hint" type="button" aria-label="Voir la suite"><span>Découvrir</span><span class="hint__line" aria-hidden="true"></span></button>
         <hgroup><h1 class="title title--xl">La compagnie</h1><p>Bruxelles · Montréal, depuis 2018</p></hgroup>
       </header>
       <div class="section wrap"><p class="punch">Des spectacles inédits et originaux, et 1001 sensations. Car la Compagnie Cliffhanger, c'est une histoire sans fin.</p></div>
@@ -529,7 +558,7 @@ const pages = {
     const grid = view.querySelector(".js-grid");
     const draw = key => {
       const items = GALLERY.map((g, i) => ({ file: g[0], label: g[1], cat: g[2], i })).filter(g => key === "all" || g.cat === key);
-      grid.innerHTML = items.map(g => `<figure><button data-i="${g.i}" aria-label="Agrandir la photo : ${esc(g.label)}"><img src="${img(g.file)}" alt="${esc(g.label)}" loading="lazy"></button><figcaption>${esc(g.label)}</figcaption></figure>`).join("");
+      grid.innerHTML = items.map(g => `<figure><button data-i="${g.i}" aria-label="Agrandir la photo : ${esc(g.label)}">${pic(g.file, { alt: g.label, sizes: "(max-width: 40em) 100vw, (max-width: 64em) 50vw, 33vw" })}</button><figcaption>${esc(g.label)}</figcaption></figure>`).join("");
       grid.querySelectorAll("[data-i]").forEach(b => b.addEventListener("click", () => lightbox.open(+b.dataset.i, items.map(g => g.i))));
       reveal(grid, "figure", .05, 0);
     };
@@ -562,7 +591,12 @@ const pages = {
 // home & spectacles: hovering a title fades its photo in behind the list
 function hoverBackdrops(view){
   const figs = view.querySelectorAll(".bg");
-  const show = slug => figs.forEach(f => f.classList.toggle("is-visible", f.dataset.for === slug));
+  const show = slug => figs.forEach(f => {
+    const on = f.dataset.for === slug, i = f.querySelector("img[data-srcset]");
+    if (on && i) { i.srcset = i.dataset.srcset; i.src = i.dataset.src; i.removeAttribute("data-srcset"); }
+    f.classList.toggle("is-visible", on);
+  });
+  warm(view);
   view.querySelectorAll("[data-bg]").forEach(a => {
     a.addEventListener("mouseenter", () => show(a.dataset.bg));
     a.addEventListener("focus", () => show(a.dataset.bg));
@@ -589,6 +623,7 @@ addEventListener("scroll", () => {
   scrollTick = true;
   requestAnimationFrame(() => {
     scrollTick = false;
+    document.querySelectorAll(".view:last-child .js-hint").forEach(h => h.classList.toggle("hint--gone", scrollY > 40));
     const hero = document.querySelector(".view:last-child .js-hero");
     if (!hero) return;
     const p = Math.min(1, Math.max(0, (scrollY / innerHeight - .5) * 2));
@@ -611,6 +646,18 @@ function setMenu(open){
     setTimeout(() => { if (!document.body.classList.contains("menu-open")) menuVideo.pause(); }, 300);
   }
 }
+// a link to the page already shown fires no hashchange, so close the menu on every click
+menu.querySelectorAll("a").forEach(a => a.addEventListener("click", () => setMenu(false)));
+
+// keep Tab inside the open menu or lightbox
+function trapTab(e, focusables){
+  const f = focusables.filter(n => n.getClientRects().length);
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+}
+
 burger.addEventListener("click", () => {
   const open = !document.body.classList.contains("menu-open");
   setMenu(open);
@@ -621,7 +668,7 @@ burger.addEventListener("click", () => {
 const lightbox = (() => {
   const box = document.getElementById("lightbox"), pic = document.getElementById("lbImg"), cap = document.getElementById("lbCap");
   let set = [], pos = 0, returnTo = null;
-  const draw = () => { const g = GALLERY[set[pos]]; pic.src = img(g[0]); pic.alt = g[1]; cap.textContent = `${g[1]} · ${pos + 1} / ${set.length}`; };
+  const draw = () => { const g = GALLERY[set[pos]]; pic.src = `img/${g[0]}.webp`; pic.alt = g[1]; cap.textContent = `${g[1]} · ${pos + 1} / ${set.length}`; };
   const step = d => { pos = (pos + d + set.length) % set.length; draw(); };
   document.getElementById("lbClose").addEventListener("click", () => api.close());
   document.getElementById("lbPrev").addEventListener("click", () => step(-1));
@@ -637,6 +684,11 @@ const lightbox = (() => {
 })();
 
 document.addEventListener("keydown", e => {
+  if (e.key === "Tab") {
+    if (lightbox.isOpen) trapTab(e, [...document.querySelectorAll("#lightbox button")]);
+    else if (document.body.classList.contains("menu-open")) trapTab(e, [burger, ...menu.querySelectorAll("a")]);
+    return;
+  }
   if (lightbox.isOpen) {
     if (e.key === "Escape") lightbox.close();
     if (e.key === "ArrowRight") lightbox.step(1);
@@ -674,6 +726,8 @@ function route(){
   document.querySelector(".menu a[aria-current]")?.setAttribute("aria-current", "page");
   scrollTo(0, 0);
   reveal(view);
+  view.querySelectorAll(".js-hint").forEach(h => h.addEventListener("click", () =>
+    view.querySelector(".phead + .section")?.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth" })));
 
   if (!old) return;
   if (reduceMotion.matches) { old.remove(); return; }
