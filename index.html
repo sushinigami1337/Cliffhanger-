@@ -111,8 +111,9 @@ img{display:block;max-width:100%}
 @keyframes drip{from{top:-40%}to{top:100%}}
 .hint--gone{opacity:0;pointer-events:none}
 .phead figcaption + .hint,.phead .hint:has(+ figcaption){bottom:3rem}
-@media (min-width:48em){.hint{right:auto;left:50%;transform:translateX(-50%)}}
-@media (max-width:47.99em){.phead hgroup{padding-right:4.5rem}}
+/* bottom right on every screen: long titles take the whole left side */
+.phead hgroup{padding-right:6rem}
+@media (min-width:48em){.hint{right:var(--spacing)}}
 .hint > *{animation:fadein 1s ease 1s both}
 
 .wrap{width:100%;max-width:56rem;margin-inline:auto;padding-inline:var(--spacing)}
