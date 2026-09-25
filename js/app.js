@@ -14,8 +14,9 @@ function pic(name, { alt = "", sizes = "100vw", eager = false, cls = "", style =
   return `<img ${cls ? `class="${cls}" ` : ""}${src} sizes="${sizes}" width="${w}" height="${h}" alt="${esc(alt)}" ${load} decoding="async"${style ? ` style="${style}"` : ""}>`;
 }
 // fetch the hover backdrops once the page is idle, so hovering a title shows its photo instantly
+const loadDeferred = i => { i.srcset = i.dataset.srcset; i.src = i.dataset.src; i.removeAttribute("data-srcset"); };
 function warm(scope){
-  const go = () => scope.querySelectorAll("img[data-srcset]").forEach(i => { i.srcset = i.dataset.srcset; i.src = i.dataset.src; i.removeAttribute("data-srcset"); });
+  const go = () => scope.querySelectorAll("img[data-srcset]").forEach(loadDeferred);
   "requestIdleCallback" in window ? requestIdleCallback(go, { timeout: 2500 }) : setTimeout(go, 1200);
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -31,7 +32,6 @@ function typeset(root){
     if (t !== n.nodeValue) n.nodeValue = t;
   }
 }
-const announce = msg => { const l = document.getElementById("live"); if (l) l.textContent = msg; };
 const bySlug = slug => SHOWS.find(s => s.slug === slug);
 // the main site is about the Brussels company; Montréal has its own page
 const BELGIUM = SHOWS.filter(s => s.troupe === "bruxelles");
@@ -41,7 +41,7 @@ const personLink = key => PEOPLE[key] ? `<a class="person" href="#/personne/${ke
 const joinFr = items => items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
 function creditLine(c){
   const people = (c.people || []).map(p => Array.isArray(p) ? `${personLink(p[0])} (${esc(p[1])})` : personLink(p));
-  const value = [c.note && esc(c.note), people.length && joinFr(people), c.text && esc(c.text)].filter(Boolean).join(" ");
+  const value = [c.note && esc(c.note), people.length && joinFr(people), c.text && esc(c.text)].filter(Boolean).join(" ").replace(/’ /g, "’");
   return `<p><b>${esc(c.role)} :</b> ${value}</p>`;
 }
 // every show a person worked on, with their roles, newest first
@@ -78,7 +78,7 @@ function runs(){
     const last = out[out.length - 1];
     const next = last && last.show === s && last.venue === d.venue && (new Date(d.day) - new Date(last.to)) <= 864e5;
     if (next) last.to = d.day;
-    else out.push({ show: s, from: d.day, to: d.day, venue: d.venue, place: place(d), country: d.country });
+    else out.push({ show: s, from: d.day, to: d.day, venue: d.venue, place: place(d) });
   }
   return out.sort((x, y) => y.from.localeCompare(x.from));
 }
@@ -107,17 +107,17 @@ function showSections(s){
   return `<div class="section wrap"><blockquote class="punch"><p>${esc(s.punch)}</p>${s.cite ? `<cite>${esc(s.cite)}</cite>` : ""}</blockquote></div>
       ${s.poster ? `<div class="section wrap wrap--wide"><figure class="wide">${pic(s.poster, { alt: `Affiche de ${s.title}`, sizes: "(max-width: 56rem) 100vw, 50vw" })}</figure></div>` : ""}
       <div class="section wrap"><div class="prose prose--justify">${s.text.map(p => `<p>${esc(p)}</p>`).join("")}</div></div>
-      <div class="section slider">
+      ${s.slides?.length ? `<div class="section slider">
         <div class="slider__items js-track">${s.slides.map(([f, alt]) => `<figure class="slide">${pic(f, { alt, sizes: "(max-width: 40em) 90vw, 45vw" })}</figure>`).join("")}</div>
         ${s.slides.length > 1 ? `<div class="slider__nav"><button data-dir="-1" aria-label="Photo précédente">‹</button><button data-dir="1" aria-label="Photo suivante">›</button></div>` : ""}
-      </div>
-      <div class="section wrap"><div class="infos">${s.credits.map(creditLine).join("")}${s.duration ? `<p><b>Durée :</b> ${esc(s.duration)}</p>` : ""}</div>
-        ${s.pdf ? `<p class="section"><a href="${esc(s.pdf)}">Dossier de diffusion (PDF)</a></p>` : ""}</div>
+      </div>` : ""}
+      <div class="section wrap"><div class="infos">${s.credits.map(creditLine).join("")}${s.duration ? `<p><b>Durée :</b> ${esc(s.duration)}</p>` : ""}</div></div>
       <div class="section wrap"><h2 class="label">${upcoming ? "À venir" : "Représentations"}</h2>
-        ${datesTable(s.dates.map(d => `<tr><td>${fmtDay(d.day)}${d.time ? `, ${fmtTime(d.time)}` : ""}</td><td>${esc(place(d))}</td><td>${esc(d.price || "")}</td><td>${esc(d.country)}</td></tr>`))}</div>`;
+        ${datesTable(s.dates.map(d => `<tr><td>${fmtDay(d.day)}${d.time ? `, ${fmtTime(d.time)}` : ""}</td><td>${esc(place(d))}</td><td>${esc(d.price || "")}</td></tr>`))}</div>`;
 }
 function wireSlider(view){
   const track = view.querySelector(".js-track");
+  if (!track) return;
   view.querySelectorAll(".slider__nav button").forEach(b =>
     b.addEventListener("click", () => track.scrollBy({ left: track.clientWidth * .6 * b.dataset.dir, behavior: "smooth" })));
 }
@@ -149,7 +149,7 @@ const pages = {
       <header class="phead">
         <figure>${pic(s.hero, { alt: s.title, eager: true, cls: "js-hero", style: `object-position:${s.focus}` })}</figure>
         ${HINT}
-        <hgroup><h1 class="title title--xl" translate="no">${esc(s.title)}</h1><p>${esc(s.by)} · ${s.year}</p></hgroup>
+        <hgroup><h1 class="title title--xl" translate="no">${esc(s.title)}</h1><p>${s.year}</p></hgroup>
         ${s.credit ? `<figcaption>© ${esc(s.credit)}</figcaption>` : ""}
       </header>
       ${showSections(s)}
@@ -159,41 +159,16 @@ const pages = {
     return s.title;
   },
 
-  agenda(view, initial){
-    const all = runs();
-    const years = [...new Set(all.map(r => r.from.slice(0, 4)))];
-    const countries = [...new Set(all.map(r => r.country))];
+  agenda(view){
+    const all = runs(), now = today();
+    const next = all.filter(r => r.to >= now).reverse(), past = all.filter(r => r.to < now);
+    const table = rows => datesTable(rows.map(r => `<tr><td>${fmtRange(r.from, r.to)}</td><td class="ev-title"><a href="#/spectacle/${r.show.slug}">${esc(r.show.title)}</a></td><td>${esc(r.place)}</td></tr>`));
     view.innerHTML = `<section class="page">${backdrop(BACKDROPS.agenda, "bgs--dark")}
       <div class="wrap wrap--wide">
         <h1 class="title title--xl title--page">Agenda</h1>
-        <div class="pills" role="group" aria-label="Filtrer par période">
-          <button class="pill" data-f="upcoming" aria-pressed="false">À venir</button>
-          <button class="pill" data-f="all" aria-pressed="true">Tout</button>
-          ${years.map(y => `<button class="pill" data-f="${y}" aria-pressed="false">${y}</button>`).join("")}
-          ${countries.length > 1 ? `<label class="v-h" for="country">Pays</label>
-          <select class="pill" id="country"><option value="">Tous les pays</option>${countries.map(c => `<option>${esc(c)}</option>`).join("")}</select>` : ""}
-        </div>
-        <div class="section js-list"></div>
+        ${next.length ? `<div class="section"><h2 class="label">À venir</h2>${table(next)}</div>` : ""}
+        <div class="section">${next.length ? `<h2 class="label">Passées</h2>` : ""}${table(past)}</div>
       </div>${footer()}</section>`;
-    const list = view.querySelector(".js-list"), country = view.querySelector("#country");
-    let period = initial && (initial === "a-venir" || /^\d{4}$/.test(initial)) ? (initial === "a-venir" ? "upcoming" : initial) : "all";
-    view.querySelectorAll("[data-f]").forEach(x => x.setAttribute("aria-pressed", x.dataset.f === period));
-    const draw = () => {
-      const rows = all.filter(r => (period === "all" || (period === "upcoming" ? r.to >= today() : r.from.startsWith(period))) && (!country || !country.value || r.country === country.value));
-      list.innerHTML = rows.length
-        ? datesTable(rows.map(r => `<tr><td>${fmtRange(r.from, r.to)}</td><td class="ev-title"><a href="#/spectacle/${r.show.slug}">${esc(r.show.title)}</a></td><td>${esc(r.place)}</td><td>${esc(r.country)}</td></tr>`))
-        : `<p class="empty">Aucune date annoncée pour le moment.</p>`;
-      typeset(list); reveal(list, "tr, .empty", .05, 0);
-      announce(rows.length ? `${rows.length} série${rows.length > 1 ? "s" : ""} de représentations` : "Aucune date");
-    };
-    view.querySelectorAll("[data-f]").forEach(b => b.addEventListener("click", () => {
-      period = b.dataset.f;
-      view.querySelectorAll("[data-f]").forEach(x => x.setAttribute("aria-pressed", x === b));
-      history.replaceState(null, "", period === "all" ? "#/agenda" : `#/agenda/${period === "upcoming" ? "a-venir" : period}`);
-      draw();
-    }));
-    country?.addEventListener("change", draw);
-    draw();
     return "Agenda";
   },
 
@@ -224,7 +199,7 @@ const pages = {
       <header class="phead">
         <figure>${pic(s.hero, { alt: s.title, eager: true, cls: "js-hero", style: `object-position:${s.focus}` })}</figure>
         ${HINT}
-        <hgroup><h1 class="title title--xl">Montréal</h1><p>Collectif Cliffhanger, collectif-sœur</p></hgroup>
+        <hgroup><h1 class="title title--xl">Montréal</h1><p>${esc(MONTREAL.sub)}</p></hgroup>
       </header>
       <div class="section wrap"><p class="punch">${esc(MONTREAL.lead)}</p></div>
       <div class="section wrap"><div class="prose prose--justify">${MONTREAL.text.map(p => `<p>${esc(p)}</p>`).join("")}</div></div>
@@ -249,29 +224,13 @@ const pages = {
     return who.name;
   },
 
-  galerie(view, initial){
-    const cats = [["all", "Tout"], ...BELGIUM.filter(s => GALLERY.some(g => g[2] === s.slug)).map(s => [s.slug, s.title]), ["coulisses", "Coulisses"]];
+  galerie(view){
     view.innerHTML = `<section class="page"><div class="wrap wrap--wide">
       <h1 class="title title--xl title--page">Galerie</h1>
-      <div class="pills" role="group" aria-label="Filtrer par spectacle">${cats.map(([k, l], i) => `<button class="pill" data-g="${k}" aria-pressed="${i === 0}">${esc(l)}</button>`).join("")}</div>
-      <div class="gallery js-grid"></div>
+      <div class="gallery">${GALLERY.map(([file, label], i) => `<figure><button data-i="${i}" aria-label="Agrandir la photo : ${esc(label)}">${pic(file, { alt: label, sizes: "(max-width: 40em) 100vw, (max-width: 64em) 50vw, 33vw" })}</button><figcaption>${esc(label)}</figcaption></figure>`).join("")}</div>
     </div>${footer()}</section>`;
-    const grid = view.querySelector(".js-grid");
-    const draw = key => {
-      const items = GALLERY.map((g, i) => ({ file: g[0], label: g[1], cat: g[2], i })).filter(g => key === "all" || g.cat === key);
-      grid.innerHTML = items.map(g => `<figure><button data-i="${g.i}" aria-label="Agrandir la photo : ${esc(g.label)}">${pic(g.file, { alt: g.label, sizes: "(max-width: 40em) 100vw, (max-width: 64em) 50vw, 33vw" })}</button><figcaption>${esc(g.label)}</figcaption></figure>`).join("");
-      grid.querySelectorAll("[data-i]").forEach(b => b.addEventListener("click", () => lightbox.open(+b.dataset.i, items.map(g => g.i))));
-      typeset(grid); reveal(grid, "figure", .05, 0);
-      announce(`${items.length} photo${items.length > 1 ? "s" : ""}`);
-    };
-    view.querySelectorAll("[data-g]").forEach(b => b.addEventListener("click", () => {
-      view.querySelectorAll("[data-g]").forEach(x => x.setAttribute("aria-pressed", x === b));
-      history.replaceState(null, "", b.dataset.g === "all" ? "#/galerie" : `#/galerie/${b.dataset.g}`);
-      draw(b.dataset.g);
-    }));
-    const start = cats.some(([k]) => k === initial) ? initial : "all";
-    view.querySelectorAll("[data-g]").forEach(x => x.setAttribute("aria-pressed", x.dataset.g === start));
-    draw(start);
+    const ids = GALLERY.map((_, i) => i);
+    view.querySelectorAll("[data-i]").forEach(b => b.addEventListener("click", () => lightbox.open(+b.dataset.i, ids)));
     return "Galerie";
   },
 
@@ -298,7 +257,7 @@ function hoverBackdrops(view){
   const figs = view.querySelectorAll(".bg");
   const show = slug => figs.forEach(f => {
     const on = f.dataset.for === slug, i = f.querySelector("img[data-srcset]");
-    if (on && i) { i.srcset = i.dataset.srcset; i.src = i.dataset.src; i.removeAttribute("data-srcset"); }
+    if (on && i) loadDeferred(i);
     f.classList.toggle("is-visible", on);
   });
   warm(view);
@@ -311,7 +270,7 @@ function hoverBackdrops(view){
 }
 
 // entrance: each block glides down into place, one after another
-const REVEAL = ".list li, .phead hgroup > *, .title--page, .pills, .section, .cols > div, .gallery figure, .contact__inner > *";
+const REVEAL = ".list li, .phead hgroup > *, .title--page, .pills, .section, .gallery figure, .contact__inner > *";
 function reveal(scope, sel = REVEAL, step = .07, start = .1){
   if (reduceMotion.matches) return;
   scope.querySelectorAll(sel).forEach((el, i) => {
