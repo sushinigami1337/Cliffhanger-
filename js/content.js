@@ -113,7 +113,7 @@ const SHOWS = [
     credits: [
       { role: "D'après", text: "Les Femmes savantes, de Molière" },
       { role: "Mise en scène", text: "collective" },
-      { role: "Avec", people: [["sophie-decaestecker", "Henriette"], ["hans-melot", "Clitandre"], ["laurie-stevens", "la mère"], ["alexandre-van-campenhout", "Chrysale"], ["audrey-colomb", "Armande"], ["alize-cookie", "Bélise"], ["julie-gloesener", "la tante"], ["nathan-leclercq", "Trissotin"]] },
+      { role: "Avec", people: [["sophie-decaestecker", "Henriette"], ["hans-melot", "Clitandre"], ["laurie-stevens", "Philaminte"], ["alexandre-van-campenhout", "Chrysale"], ["audrey-colomb", "Armande"], ["alize-cookie", "Bélise"], ["julie-gloesener", "la tante"], ["nathan-leclercq", "Trissotin"]] },
     ],
     dates: [
       { day: "2019-11-04", time: "20:30", venue: "Salle Delvaux", city: "ULB Solbosch", country: "Belgique", price: "5 €" },
