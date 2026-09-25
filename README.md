@@ -2,8 +2,8 @@
 
 Salut Brendan. Ce dépôt contient le **prototype fonctionnel** du site, fait pour montrer le projet à la compagnie. Il n'est pas figé : c'est une référence vivante pour les contenus, les images et surtout les animations. Tu es libre de repartir de zéro sur ta stack.
 
-- **Démo en ligne :** https://compagnie-cliffhanger.netlify.app (hébergement de démo seulement)
-- **Maquettes Figma :** https://www.figma.com/design/vP8Z0mWn7ytbZk3IoL3Z6u (commence par la page « À lire d'abord », puis « Guide dev »)
+- **Aperçu à jour :** https://claude.ai/artifact/M9ZnDW6T1xgfJ7WUvcpb4u (la démo https://compagnie-cliffhanger.netlify.app est mise à jour moins souvent)
+- **Maquettes Figma :** https://www.figma.com/design/vP8Z0mWn7ytbZk3IoL3Z6u (page « Site · maquettes (V2) » : desktop, états, mobile et captures du vrai site en téléphone et tablette ; puis « Notes pour Brendan » et « Guide dev »)
 - **Référence de style :** https://www.focusandchaliwate.be/fr (le système a été relevé dans leur CSS)
 - **Originaux des médias :** Google Drive de la compagnie, dossier `CLIFFHANGER/03_MEDIAS` (accès via Hans)
 
@@ -15,7 +15,7 @@ Site statique, sans build ni dépendance.
 |---|---|
 | `index.html` | Squelette : en-tête, burger, menu, conteneur des pages, visionneuse photo |
 | `css/site.css` | Tous les styles (polices, tokens, pages, animations) |
-| `js/content.js` | **Tout le contenu** : `CONTACT`, `SHOWS` (spectacles et dates), `GALLERY`, `TEAM`, `BACKDROPS`. Seul fichier à toucher pour changer un texte |
+| `js/content.js` | **Tout le contenu** : `CONTACT`, `PEOPLE` (personnes et bios), `SHOWS` (spectacles, génériques, dates), `MONTREAL`, `GALLERY`, `BACKDROPS`. Seul fichier à toucher pour changer un texte |
 | `js/app.js` | Rendu des pages, navigation, filtres, animations, visionneuse |
 | `fonts/` | Jost (variable, 300 à 500) et Archivo ExtraBold, en local, sous-ensembles latin et latin-ext |
 | `img/` | Photos en WebP : `nom-960.webp`, `nom-1440.webp` si la photo dépasse 1440 px, `nom.webp` pleine taille. `menu.mp4` pour le fond du menu |
@@ -35,7 +35,25 @@ Puis ouvrir http://localhost:3000. Il faut un petit serveur (et non le fichier o
 npx netlify-cli deploy --prod --dir .
 ```
 
+## Pages
+
+| Adresse | Page |
+|---|---|
+| `#/` | Accueil : liste des spectacles belges, photo au survol |
+| `#/spectacles`, `#/spectacle/<slug>` | Liste et fiche spectacle |
+| `#/agenda`, `#/agenda/<année ou a-venir>` | Agenda, Belgique seulement |
+| `#/compagnie` | Histoire et équipe, chaque nom est un lien |
+| `#/personne/<clé>` | Fiche personne : projets, puis bio si elle existe |
+| `#/galerie`, `#/galerie/<slug>` | Galerie filtrable |
+| `#/montreal` | Le collectif-sœur de Montréal et Un C(h)œur silencieux, à part : le reste du site est centré sur Bruxelles |
+| `#/contact` | Contact |
+
 ## Contenu
+
+- Une personne = une entrée dans `PEOPLE` (clé en slug). `guest: true` : invitée, hors équipe (l'autrice de L'Inédit). `montreal: true` : membre du collectif de Montréal, hors équipe bruxelloise. Sans `bio`, la fiche montre seulement les projets.
+- Un générique = `credits: [{ role, people: [clé ou [clé, "personnage"]], note, text }]`. Les noms deviennent des liens vers les fiches.
+- Un spectacle a `troupe: "bruxelles"` ou `"montreal"`.
+- La direction artistique et la devise « Avancer plus loin, ensemble, au rythme de nos différences » sont celles d'Alexandre Van Campenhout, pas de la compagnie : elles restent sur sa fiche.
 
 - Une date = une ligne dans `SHOWS[].dates` (`day`, `time`, `venue`, `city`, `country`, `price`). L'agenda regroupe tout seul les soirs consécutifs en séries (« 17 et 18 avr. 2026 », « 24 au 26 mai 2024 »).
 - Une nouvelle photo : ajouter les 2 ou 3 fichiers WebP dans `img/`, puis ses dimensions dans `DIMS` (en haut de `app.js`).
