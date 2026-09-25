@@ -105,7 +105,7 @@ const HINT = `<button class="hint js-hint" type="button" aria-label="Voir la sui
 function showSections(s){
   const upcoming = s.dates.some(d => d.day >= today());
   return `<div class="section wrap"><blockquote class="punch"><p>${esc(s.punch)}</p>${s.cite ? `<cite>${esc(s.cite)}</cite>` : ""}</blockquote></div>
-      ${s.poster ? `<div class="section wrap wrap--wide"><figure class="wide">${pic(s.poster, { alt: `Affiche de ${s.title}`, sizes: "(max-width: 56rem) 100vw, 50vw" })}</figure></div>` : ""}
+      ${s.poster ? `<div class="section wrap wrap--wide"><figure class="wide">${pic(s.poster, { alt: `Affiche de ${s.title}`, sizes: "(max-width: 40em) 100vw, 40rem" })}</figure></div>` : ""}
       <div class="section wrap"><div class="prose prose--justify">${s.text.map(p => `<p>${esc(p)}</p>`).join("")}</div></div>
       ${s.slides?.length ? `<div class="section slider">
         <div class="slider__items js-track">${s.slides.map(([f, alt]) => `<figure class="slide">${pic(f, { alt, sizes: "(max-width: 40em) 90vw, 45vw" })}</figure>`).join("")}</div>

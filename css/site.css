@@ -107,8 +107,8 @@ a,button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 /* bottom right on every screen: long titles take the whole left side */
 .phead hgroup{padding-right:6rem}
 @media (min-width:48em){.hint{right:var(--spacing)}}
-/* phone: only the line, so a long title keeps the width */
-@media (max-width:40em){.hint > span:first-child{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.phead hgroup{padding-right:2.5rem}}
+/* phone and tablet: only the line, so a long title keeps the width */
+@media (max-width:63.99em){.hint > span:first-child{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.phead hgroup{padding-right:2.5rem}}
 .hint > *{animation:fadein 1s ease 1s both}
 
 .wrap{width:100%;max-width:56rem;margin-inline:auto;padding-inline:var(--spacing)}
@@ -117,8 +117,9 @@ a,button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .phead + .section{margin-top:calc(var(--leading) * 1.5)}
 .punch{font-size:clamp(1.5rem,3.5vw,2.5rem);font-weight:400;line-height:1.25;opacity:.75;text-wrap:balance}
 .punch cite{display:block;margin-top:1rem;font-size:1rem;font-style:normal;opacity:.8}
-.wide{aspect-ratio:16/9;overflow:hidden}
-.wide img{width:100%;height:100%;object-fit:contain}
+/* poster at its own proportions: a 16:9 box made it tiny on phones */
+.wide{display:flex;justify-content:center}
+.wide img{width:auto;max-width:100%;height:auto;max-height:min(80svh,48rem)}
 .prose{display:grid;gap:1rem;font-size:1.0625rem;line-height:1.5}
 .prose p{text-wrap:pretty}
 @media (min-width:40em){.prose--justify{text-align:justify;hyphens:auto}}

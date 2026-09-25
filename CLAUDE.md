@@ -6,7 +6,7 @@ Site vitrine de la Compagnie Cliffhanger (théâtre, Bruxelles). Lis d'abord `RE
 
 1. **Le code de ce dépôt** fait foi pour les contenus, les textes et les animations.
 2. **Figma** : https://www.figma.com/design/vP8Z0mWn7ytbZk3IoL3Z6u
-   - Page « Site · maquettes (V2) » : section 1 desktop 1440 (01 Accueil `5:3`, 02 Spectacles `5:46`, 03 Spectacle `6:2`, 04 Agenda `6:54`, 05 La compagnie `9:6`, 06 Galerie `9:75`, 07 Contact `9:113`, 08 Fiche personne `27:2`, 09 Montréal `27:50`), section 2 états (survol, menu ouvert), section 3 téléphone 390 (toutes les pages), section 4 tablette 820 (toutes les pages et le menu). Breakpoints du CSS : 40em (tableaux en colonne, Découvrir réduit à son trait), 48em, 64em, 80em.
+   - Page « Site · maquettes (V2) » : section 1 desktop 1440 (01 Accueil `5:3`, 02 Spectacles `5:46`, 03 Spectacle `6:2`, 04 Agenda `6:54`, 05 La compagnie `9:6`, 06 Galerie `9:75`, 07 Contact `9:113`, 08 Fiche personne `27:2`, 09 Montréal `27:50`), section 2 états (survol, menu ouvert), section 3 téléphone 390 (toutes les pages), section 4 tablette 820 (toutes les pages et le menu). Breakpoints du CSS : 40em (tableaux en colonne, texte non justifié), 48em, 64em (en dessous, « Découvrir » réduit à son trait), 80em.
    - Page « Guide dev » : couleurs (variables `couleur/…`), styles de texte `Cliffhanger/…`, espacements, animations chiffrées, correspondance des médias.
    - Les comportements (survol, vidéo, défilement) sont décrits dans les annotations du mode Dev.
 3. **Référence de style** : https://www.focusandchaliwate.be/fr
