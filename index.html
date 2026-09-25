@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#000000">
 <title>Compagnie Cliffhanger</title>
 <meta name="description" content="Compagnie de théâtre entre Bruxelles et Montréal.">
 <meta property="og:title" content="Compagnie Cliffhanger">
@@ -41,6 +42,13 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 img{display:block;max-width:100%}
 :focus-visible{outline:.125rem dotted var(--muted);outline-offset:.2rem;border-radius:.25rem}
 .v-h{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+a,button,select{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media (pointer:coarse){.pill{min-height:2.75rem}}
+.skip{position:fixed;left:1rem;top:-4rem;z-index:60;padding:.75rem 1rem;background:var(--front);color:var(--back);font-weight:400;transition:top .2s}
+.skip:focus{top:calc(1rem + var(--safe-top))}
+/* keep white text readable on bright photos: soft shade at the top (logo) and bottom (titles) */
+.bgs::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.35),transparent 22%,transparent 50%,rgba(0,0,0,.45));pointer-events:none}
+.phead::before{content:"";position:absolute;inset:0 0 auto 0;z-index:1;height:25%;background:linear-gradient(rgba(0,0,0,.35),transparent);pointer-events:none}
 
 .title{font-family:var(--display);font-weight:800;letter-spacing:.1875em;text-transform:uppercase;line-height:1.15;text-wrap:balance}
 .title--xl{font-size:clamp(2rem,6vw,3rem)}
@@ -51,7 +59,7 @@ img{display:block;max-width:100%}
 .mh__logo{pointer-events:auto;display:inline-block;max-width:14rem;font-size:1.5rem;letter-spacing:.25em;text-transform:uppercase;line-height:1.2;opacity:.75;transition:opacity .25s linear}
 .mh__logo:hover,.mh__logo:focus-visible{opacity:1}
 
-.burger{position:fixed;right:1rem;top:calc(1rem + var(--safe-top));z-index:40;width:1.75rem;height:1.75rem;padding:.125rem;opacity:.75;transition:opacity .25s linear}
+.burger{position:fixed;right:.375rem;top:calc(.375rem + var(--safe-top));z-index:40;display:grid;place-items:center;width:2.75rem;height:2.75rem;opacity:.75;transition:opacity .25s linear}
 .burger:hover,.burger:focus-visible{opacity:1}
 .burger svg{display:block;width:1.5rem;height:1.5rem}
 .burger rect{fill:currentColor;transition:transform .3s ease,opacity .1s ease}
@@ -61,17 +69,15 @@ img{display:block;max-width:100%}
 .menu-open .burger .s2{opacity:0}
 .menu-open .burger .s3{transform:translateX(4px) rotate(-45deg)}
 
-.menu{position:fixed;inset:0;z-index:30;isolation:isolate;display:flex;align-items:center;justify-content:center;padding:2rem 1rem;background:var(--back);opacity:0;visibility:hidden;transition:opacity .25s linear,visibility .25s linear}
+.menu{position:fixed;inset:0;z-index:30;isolation:isolate;overscroll-behavior:contain;display:flex;align-items:center;justify-content:center;padding:2rem 1rem;background:var(--back);opacity:0;visibility:hidden;transition:opacity .25s linear,visibility .25s linear}
 .menu-open .menu{opacity:1;visibility:visible}
 .menu__bg{position:absolute;inset:0;z-index:-1;width:100%;height:100%;object-fit:cover;filter:brightness(.4);pointer-events:none}
 .menu ul{position:relative;display:grid;gap:.5rem;text-align:center;font-size:1.5rem;font-weight:400}
 .menu li{opacity:0;transform:translateY(-.75rem);transition:opacity .4s ease,transform .5s var(--ease-out);transition-delay:0s}
 .menu-open .menu li{opacity:1;transform:none;transition-delay:calc(var(--i,0) * 50ms)}
-.menu a{opacity:.75;transition:opacity .25s}
+.menu a{display:inline-block;padding:.25rem .75rem;opacity:.75;transition:opacity .25s}
 .menu a:hover,.menu a:focus-visible,.menu a[aria-current="page"]{opacity:1}
 .menu__logo{width:clamp(7rem,22vh,12rem);height:auto;margin:0 auto clamp(1.5rem,5vh,3rem)}
-.menu__langs{display:flex;justify-content:center;gap:1rem;margin-top:1rem}
-.menu__langs [aria-disabled]{opacity:.4}
 
 /* ---------- full-screen indexes (home, spectacles) ---------- */
 .index{position:relative;isolation:isolate;min-height:100svh;display:flex;flex-direction:column;padding:0 var(--spacing) 6.75rem}
@@ -125,7 +131,8 @@ img{display:block;max-width:100%}
 .wide{aspect-ratio:16/9;overflow:hidden;background:#050505}
 .wide img{width:100%;height:100%;object-fit:contain}
 .prose{display:grid;gap:1rem;font-size:1.0625rem;line-height:1.5}
-.prose--justify{text-align:justify;hyphens:auto}
+.prose p{text-wrap:pretty}
+@media (min-width:40em){.prose--justify{text-align:justify;hyphens:auto}}
 .prose strong,.infos b{font-weight:500}
 .label{margin-bottom:.5rem;font-size:1.25rem;font-weight:400;text-transform:uppercase}
 .infos{display:grid;gap:.35rem;line-height:1.5}
@@ -137,7 +144,7 @@ img{display:block;max-width:100%}
 .slide{flex:0 0 auto;scroll-snap-align:center}
 .slide img{width:auto;max-width:none;height:min(66vh,38rem)}
 .slider__nav{display:flex;justify-content:flex-end;gap:1.5rem;padding:1rem var(--spacing) 0}
-.slider__nav button{width:2.5rem;font-size:2.5rem;line-height:1;opacity:.75}
+.slider__nav button{width:2.75rem;height:2.75rem;font-size:2.5rem;line-height:1;opacity:.75}
 .slider__nav button:hover,.slider__nav button:focus-visible{opacity:1}
 
 /* ---------- tables (dates, team) ---------- */
@@ -161,7 +168,7 @@ img{display:block;max-width:100%}
 
 /* ---------- pills ---------- */
 .pills{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:2rem}
-.pill{padding:.5rem 1rem;border:.0625rem solid var(--front);border-radius:2rem;font-size:1rem;font-weight:400;transition:background-color .2s,color .2s}
+.pill{display:inline-flex;align-items:center;min-height:2.25rem;padding:.5rem 1rem;border:.0625rem solid var(--front);border-radius:2rem;font-size:1rem;font-weight:400;transition:background-color .2s,color .2s}
 .pill:hover,.pill:focus-visible,.pill[aria-pressed="true"]{background:var(--front);color:var(--back)}
 select.pill{appearance:none;padding-right:2.25rem;background:transparent linear-gradient(45deg,transparent 50%,currentColor 50%) calc(100% - 1.1rem) 55%/.3rem .3rem no-repeat,linear-gradient(135deg,currentColor 50%,transparent 50%) calc(100% - .8rem) 55%/.3rem .3rem no-repeat}
 select.pill:hover,select.pill:focus-visible{background-color:transparent;color:var(--front)}
@@ -183,10 +190,10 @@ select.pill option{background:var(--back);color:var(--front)}
 .gallery button:hover img,.gallery button:focus-visible img{opacity:.85}
 .gallery figcaption{padding:.35rem .25rem;font-size:.75rem;opacity:.75}
 
-.lightbox{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:3.5rem 1rem 2.5rem;background:rgba(0,0,0,.94);animation:fadein .3s ease both}
+.lightbox{position:fixed;inset:0;z-index:50;overscroll-behavior:contain;touch-action:pan-y;display:flex;align-items:center;justify-content:center;padding:3.5rem 1rem 2.5rem;background:rgba(0,0,0,.94);animation:fadein .3s ease both}
 .lightbox img{max-width:100%;max-height:100%;object-fit:contain}
 .lb-close{position:absolute;top:calc(1rem + var(--safe-top));right:1rem;padding:.35rem .9rem;border:.0625rem solid var(--front);border-radius:2rem}
-.lb-prev,.lb-next{position:absolute;top:50%;transform:translateY(-50%);padding:1rem;font-size:3rem;opacity:.75}
+.lb-prev,.lb-next{position:absolute;top:50%;transform:translateY(-50%);min-width:2.75rem;min-height:2.75rem;padding:1rem;font-size:3rem;opacity:.75}
 .lb-prev{left:0}
 .lb-next{right:0}
 .lb-cap{position:absolute;left:0;right:0;bottom:1rem;text-align:center;font-size:.875rem;opacity:.75}
@@ -195,6 +202,9 @@ select.pill option{background:var(--back);color:var(--front)}
 .contact__inner{display:grid;justify-items:center;gap:1.25rem}
 .contact__lead{font-size:1.25rem;opacity:.75;--o:.75}
 .contact__mail{font-size:clamp(1.25rem,3vw,2rem);font-weight:400;word-break:break-word}
+.contact__mail a{border-bottom:.0625rem solid rgba(255,255,255,.4);transition:border-color .25s}
+.contact__mail a:hover,.contact__mail a:focus-visible{border-color:var(--front)}
+.ext::after{content:"↗";margin-left:.35em;font-size:.8em}
 .contact .pills{justify-content:center;margin-top:1rem}
 
 /* ---------- motion ---------- */
@@ -212,6 +222,7 @@ select.pill option{background:var(--back);color:var(--front)}
 </head>
 <body>
 
+<a class="skip" href="#app" onclick="document.getElementById('app').focus();return false">Aller au contenu</a>
 <header class="mh">
   <a href="#/" class="mh__logo" translate="no">Compagnie Cliffhanger</a>
 </header>
@@ -229,16 +240,16 @@ select.pill option{background:var(--back);color:var(--front)}
     <li style="--i:3"><a href="#/agenda">Agenda</a></li>
     <li style="--i:4"><a href="#/galerie">Galerie</a></li>
     <li style="--i:5"><a href="#/contact">Contact</a></li>
-    <li style="--i:6" class="menu__langs" translate="no"><span>fr</span><span aria-disabled="true" title="Version anglaise à venir">en</span></li>
   </ul>
 </nav>
 
-<main id="app">
+<main id="app" tabindex="-1">
+  <p class="v-h" id="live" aria-live="polite"></p>
   <noscript>
     <div class="contact"><div class="contact__inner">
       <p class="title title--xl title--page">Compagnie Cliffhanger</p>
       <p class="contact__lead">Compagnie de théâtre entre Bruxelles et Montréal</p>
-      <p class="contact__mail">compagnie.cliffhanger@gmail.com</p>
+      <p class="contact__mail"><a href="mailto:compagnie.cliffhanger@gmail.com">compagnie.cliffhanger@gmail.com</a></p>
     </div></div>
   </noscript>
 </main>
@@ -393,6 +404,19 @@ function warm(scope){
   "requestIdleCallback" in window ? requestIdleCallback(go, { timeout: 2500 }) : setTimeout(go, 1200);
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+// French typography on every rendered text node: ’ instead of ', no-break space before : and inside « », thin one before ? ! ;
+function typeset(root){
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (let n; (n = w.nextNode());) {
+    const t = n.nodeValue
+      .replace(/'/g, "\u2019")
+      .replace(/ ([:])/g, "\u00a0$1")
+      .replace(/ ([?!;»])/g, "\u202f$1")
+      .replace(/« /g, "«\u00a0");
+    if (t !== n.nodeValue) n.nodeValue = t;
+  }
+}
+const announce = msg => { const l = document.getElementById("live"); if (l) l.textContent = msg; };
 const bySlug = slug => SHOWS.find(s => s.slug === slug);
 const today = () => new Date().toISOString().slice(0, 10);
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
@@ -449,7 +473,7 @@ function datesTable(rows){
    ========================================================================= */
 const pages = {
   home(view){
-    view.innerHTML = `<section class="index index--home">${backdrop(BACKDROPS.home)}${showList(false)}${footer(true)}</section>`;
+    view.innerHTML = `<section class="index index--home"><h1 class="v-h">Compagnie Cliffhanger, compagnie de théâtre entre Bruxelles et Montréal</h1>${backdrop(BACKDROPS.home)}${showList(false)}${footer(true)}</section>`;
     hoverBackdrops(view);
   },
 
@@ -490,7 +514,7 @@ const pages = {
     return s.title;
   },
 
-  agenda(view){
+  agenda(view, initial){
     const all = runs();
     const years = [...new Set(all.map(r => r.from.slice(0, 4)))];
     const countries = [...new Set(all.map(r => r.country))];
@@ -507,17 +531,20 @@ const pages = {
         <div class="section js-list"></div>
       </div>${footer()}</section>`;
     const list = view.querySelector(".js-list"), country = view.querySelector("#country");
-    let period = "all";
+    let period = initial && (initial === "a-venir" || /^\d{4}$/.test(initial)) ? (initial === "a-venir" ? "upcoming" : initial) : "all";
+    view.querySelectorAll("[data-f]").forEach(x => x.setAttribute("aria-pressed", x.dataset.f === period));
     const draw = () => {
       const rows = all.filter(r => (period === "all" || (period === "upcoming" ? r.to >= today() : r.from.startsWith(period))) && (!country.value || r.country === country.value));
       list.innerHTML = rows.length
         ? datesTable(rows.map(r => `<tr><td>${fmtRange(r.from, r.to)}</td><td class="ev-title"><a href="#/spectacle/${r.show.slug}">${esc(r.show.title)}</a></td><td>${esc(r.place)}</td><td>${esc(r.country)}</td></tr>`))
         : `<p class="empty">Aucune date annoncée pour le moment.</p>`;
-      reveal(list, "tr, .empty", .05, 0);
+      typeset(list); reveal(list, "tr, .empty", .05, 0);
+      announce(rows.length ? `${rows.length} série${rows.length > 1 ? "s" : ""} de représentations` : "Aucune date");
     };
     view.querySelectorAll("[data-f]").forEach(b => b.addEventListener("click", () => {
       period = b.dataset.f;
       view.querySelectorAll("[data-f]").forEach(x => x.setAttribute("aria-pressed", x === b));
+      history.replaceState(null, "", period === "all" ? "#/agenda" : `#/agenda/${period === "upcoming" ? "a-venir" : period}`);
       draw();
     }));
     country.addEventListener("change", draw);
@@ -549,7 +576,7 @@ const pages = {
     return "La compagnie";
   },
 
-  galerie(view){
+  galerie(view, initial){
     const cats = [["all", "Tout"], ...SHOWS.filter(s => GALLERY.some(g => g[2] === s.slug)).map(s => [s.slug, s.title]), ["coulisses", "Coulisses"]];
     view.innerHTML = `<section class="page"><div class="wrap wrap--wide">
       <h1 class="title title--xl title--page">Galerie</h1>
@@ -561,13 +588,17 @@ const pages = {
       const items = GALLERY.map((g, i) => ({ file: g[0], label: g[1], cat: g[2], i })).filter(g => key === "all" || g.cat === key);
       grid.innerHTML = items.map(g => `<figure><button data-i="${g.i}" aria-label="Agrandir la photo : ${esc(g.label)}">${pic(g.file, { alt: g.label, sizes: "(max-width: 40em) 100vw, (max-width: 64em) 50vw, 33vw" })}</button><figcaption>${esc(g.label)}</figcaption></figure>`).join("");
       grid.querySelectorAll("[data-i]").forEach(b => b.addEventListener("click", () => lightbox.open(+b.dataset.i, items.map(g => g.i))));
-      reveal(grid, "figure", .05, 0);
+      typeset(grid); reveal(grid, "figure", .05, 0);
+      announce(`${items.length} photo${items.length > 1 ? "s" : ""}`);
     };
     view.querySelectorAll("[data-g]").forEach(b => b.addEventListener("click", () => {
       view.querySelectorAll("[data-g]").forEach(x => x.setAttribute("aria-pressed", x === b));
+      history.replaceState(null, "", b.dataset.g === "all" ? "#/galerie" : `#/galerie/${b.dataset.g}`);
       draw(b.dataset.g);
     }));
-    draw("all");
+    const start = cats.some(([k]) => k === initial) ? initial : "all";
+    view.querySelectorAll("[data-g]").forEach(x => x.setAttribute("aria-pressed", x.dataset.g === start));
+    draw(start);
     return "Galerie";
   },
 
@@ -576,10 +607,10 @@ const pages = {
       <div class="contact__inner">
         <h1 class="title title--xl title--page">Contact</h1>
         <p class="contact__lead">Réservations, diffusion, presse</p>
-        <p class="contact__mail">${esc(CONTACT.email)}</p>
+        <p class="contact__mail"><a href="mailto:${esc(CONTACT.email)}">${esc(CONTACT.email)}</a></p>
         <div class="pills">
-          <a class="pill" href="${CONTACT.instagram}" target="_blank" rel="noopener">Instagram</a>
-          <a class="pill" href="${CONTACT.facebook}" target="_blank" rel="noopener">Facebook</a>
+          <a class="pill ext" href="${CONTACT.instagram}" target="_blank" rel="noopener">Instagram<span class="v-h"> (nouvel onglet)</span></a>
+          <a class="pill ext" href="${CONTACT.facebook}" target="_blank" rel="noopener">Facebook<span class="v-h"> (nouvel onglet)</span></a>
         </div>
       </div>${footer(true)}</section>`;
     return "Contact";
@@ -669,12 +700,15 @@ burger.addEventListener("click", () => {
 const lightbox = (() => {
   const box = document.getElementById("lightbox"), pic = document.getElementById("lbImg"), cap = document.getElementById("lbCap");
   let set = [], pos = 0, returnTo = null;
-  const draw = () => { const g = GALLERY[set[pos]]; pic.src = `img/${g[0]}.webp`; pic.alt = g[1]; cap.textContent = `${g[1]} · ${pos + 1} / ${set.length}`; };
+  const draw = () => { const g = GALLERY[set[pos]]; pic.src = `img/${g[0]}.webp`; pic.alt = g[1]; cap.textContent = `${g[1].replace(/'/g, "’")} · ${pos + 1} / ${set.length}`; };
   const step = d => { pos = (pos + d + set.length) % set.length; draw(); };
   document.getElementById("lbClose").addEventListener("click", () => api.close());
   document.getElementById("lbPrev").addEventListener("click", () => step(-1));
   document.getElementById("lbNext").addEventListener("click", () => step(1));
   box.addEventListener("click", e => { if (e.target === box) api.close(); });
+  let x0 = null;
+  box.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+  box.addEventListener("touchend", e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1); x0 = null; });
   const api = {
     get isOpen(){ return !box.hidden; },
     open(i, ids){ returnTo = document.activeElement; set = ids; pos = ids.indexOf(i); draw(); box.hidden = false; document.getElementById("lbClose").focus(); },
@@ -704,9 +738,15 @@ document.addEventListener("keydown", e => {
    ========================================================================= */
 const host = document.getElementById("app");
 history.scrollRestoration = "manual";
+const scrollMemory = {};
+let lastHash = location.hash, followingLink = false;
+document.addEventListener("click", e => { if (e.target.closest('a[href^="#/"]')) followingLink = true; });
 
 function route(){
   const [name, param] = location.hash.replace(/^#\/?/, "").split("/");
+  scrollMemory[lastHash] = scrollY;
+  const target = followingLink ? 0 : (scrollMemory[location.hash] || 0);
+  followingLink = false; lastHash = location.hash;
   const render = pages[name] ? pages[name] : pages.home;
   setMenu(false);
 
@@ -722,10 +762,11 @@ function route(){
   host.appendChild(view);
   const pageTitle = render(view, param);
   if (!view.firstChild) return; // redirected
-  document.title = pageTitle ? `${pageTitle} · Compagnie Cliffhanger` : "Compagnie Cliffhanger";
+  document.title = pageTitle ? `${pageTitle.replace(/'/g, "’")} · Compagnie Cliffhanger` : "Compagnie Cliffhanger";
   document.querySelectorAll(".menu a").forEach(a => a.toggleAttribute("aria-current", a.getAttribute("href") === `#/${name}`));
   document.querySelector(".menu a[aria-current]")?.setAttribute("aria-current", "page");
-  scrollTo(0, 0);
+  typeset(view);
+  scrollTo(0, target);
   reveal(view);
   view.querySelectorAll(".js-hint").forEach(h => h.addEventListener("click", () =>
     view.querySelector(".phead + .section")?.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth" })));
