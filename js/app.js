@@ -33,6 +33,26 @@ function typeset(root){
 }
 const announce = msg => { const l = document.getElementById("live"); if (l) l.textContent = msg; };
 const bySlug = slug => SHOWS.find(s => s.slug === slug);
+// the main site is about the Brussels company; Montréal has its own page
+const BELGIUM = SHOWS.filter(s => s.troupe === "bruxelles");
+const showHref = s => s.troupe === "montreal" ? "#/montreal" : `#/spectacle/${s.slug}`;
+const personKey = p => Array.isArray(p) ? p[0] : p;
+const personLink = key => PEOPLE[key] ? `<a class="person" href="#/personne/${key}">${esc(PEOPLE[key].name)}</a>` : esc(key);
+const joinFr = items => items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+function creditLine(c){
+  const people = (c.people || []).map(p => Array.isArray(p) ? `${personLink(p[0])} (${esc(p[1])})` : personLink(p));
+  const value = [c.note && esc(c.note), people.length && joinFr(people), c.text && esc(c.text)].filter(Boolean).join(" ");
+  return `<p><b>${esc(c.role)} :</b> ${value}</p>`;
+}
+// every show a person worked on, with their roles, newest first
+function projectsOf(key){
+  return SHOWS.map(show => ({ show, roles: show.credits.flatMap(c => {
+      const entry = (c.people || []).find(p => personKey(p) === key);
+      if (!entry) return [];
+      const role = c.role === "Avec" ? "Interprétation" : c.role;
+      return [Array.isArray(entry) ? `${role} (${entry[1]})` : role];
+    }) })).filter(x => x.roles.length).sort((a, b) => b.show.year - a.show.year);
+}
 const today = () => new Date().toISOString().slice(0, 10);
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -54,7 +74,7 @@ const place = d => [d.venue, d.city].filter(Boolean).join(", ");
 // consecutive performances of one show in one venue become one agenda line
 function runs(){
   const out = [];
-  for (const s of SHOWS) for (const d of s.dates) {
+  for (const s of BELGIUM) for (const d of s.dates) {
     const last = out[out.length - 1];
     const next = last && last.show === s && last.venue === d.venue && (new Date(d.day) - new Date(last.to)) <= 864e5;
     if (next) last.to = d.day;
@@ -71,12 +91,35 @@ const footer = (pinned = false) => `<p class="foot${pinned ? " foot--pinned" : "
 function backdrop(base, tone = ""){
   return `<div class="bgs ${tone}" aria-hidden="true">
     <figure>${pic(base, { eager: true })}</figure>
-    ${SHOWS.map(s => `<figure class="bg" data-for="${s.slug}">${pic(s.hero, { deferred: true, style: `object-position:${s.focus}` })}</figure>`).join("")}
+    ${BELGIUM.map(s => `<figure class="bg" data-for="${s.slug}">${pic(s.hero, { deferred: true, style: `object-position:${s.focus}` })}</figure>`).join("")}
   </div>`;
 }
 
 function showList(withYear){
-  return `<ul class="list">${SHOWS.map(s => `<li><a class="title" href="#/spectacle/${s.slug}" data-bg="${s.slug}" translate="no">${esc(s.title)}${withYear ? `<small>${s.year}</small>` : ""}</a></li>`).join("")}</ul>`;
+  return `<ul class="list">${BELGIUM.map(s => `<li><a class="title" href="#/spectacle/${s.slug}" data-bg="${s.slug}" translate="no">${esc(s.title)}${withYear ? `<small>${s.year}</small>` : ""}</a></li>`).join("")}</ul>`;
+}
+
+const HINT = `<button class="hint js-hint" type="button" aria-label="Voir la suite"><span>Découvrir</span><span class="hint__line" aria-hidden="true"></span></button>`;
+
+// punchline, poster, text, photos, credits and dates of one show
+function showSections(s){
+  const upcoming = s.dates.some(d => d.day >= today());
+  return `<div class="section wrap"><blockquote class="punch"><p>${esc(s.punch)}</p>${s.cite ? `<cite>${esc(s.cite)}</cite>` : ""}</blockquote></div>
+      ${s.poster ? `<div class="section wrap wrap--wide"><figure class="wide">${pic(s.poster, { alt: `Affiche de ${s.title}`, sizes: "(max-width: 56rem) 100vw, 50vw" })}</figure></div>` : ""}
+      <div class="section wrap"><div class="prose prose--justify">${s.text.map(p => `<p>${esc(p)}</p>`).join("")}</div></div>
+      <div class="section slider">
+        <div class="slider__items js-track">${s.slides.map(([f, alt]) => `<figure class="slide">${pic(f, { alt, sizes: "(max-width: 40em) 90vw, 45vw" })}</figure>`).join("")}</div>
+        ${s.slides.length > 1 ? `<div class="slider__nav"><button data-dir="-1" aria-label="Photo précédente">‹</button><button data-dir="1" aria-label="Photo suivante">›</button></div>` : ""}
+      </div>
+      <div class="section wrap"><div class="infos">${s.credits.map(creditLine).join("")}${s.duration ? `<p><b>Durée :</b> ${esc(s.duration)}</p>` : ""}</div>
+        ${s.pdf ? `<p class="section"><a href="${esc(s.pdf)}">Dossier de diffusion (PDF)</a></p>` : ""}</div>
+      <div class="section wrap"><h2 class="label">${upcoming ? "À venir" : "Représentations"}</h2>
+        ${datesTable(s.dates.map(d => `<tr><td>${fmtDay(d.day)}${d.time ? `, ${fmtTime(d.time)}` : ""}</td><td>${esc(place(d))}</td><td>${esc(d.price || "")}</td><td>${esc(d.country)}</td></tr>`))}</div>`;
+}
+function wireSlider(view){
+  const track = view.querySelector(".js-track");
+  view.querySelectorAll(".slider__nav button").forEach(b =>
+    b.addEventListener("click", () => track.scrollBy({ left: track.clientWidth * .6 * b.dataset.dir, behavior: "smooth" })));
 }
 
 function datesTable(rows){
@@ -88,7 +131,7 @@ function datesTable(rows){
    ========================================================================= */
 const pages = {
   home(view){
-    view.innerHTML = `<section class="index index--home"><h1 class="v-h">Compagnie Cliffhanger, compagnie de théâtre entre Bruxelles et Montréal</h1>${backdrop(BACKDROPS.home)}${showList(false)}${footer(true)}</section>`;
+    view.innerHTML = `<section class="index index--home"><h1 class="v-h">Compagnie Cliffhanger, compagnie de théâtre bruxelloise</h1>${backdrop(BACKDROPS.home)}${showList(false)}${footer(true)}</section>`;
     hoverBackdrops(view);
   },
 
@@ -101,31 +144,18 @@ const pages = {
   spectacle(view, slug){
     const s = bySlug(slug);
     if (!s) { location.replace("#/spectacles"); return; }
-    const upcoming = s.dates.some(d => d.day >= today());
-    const info = [...s.credits, ...(s.duration ? [["Durée", s.duration]] : [])];
+    if (s.troupe === "montreal") { location.replace("#/montreal"); return; }
     view.innerHTML = `<article>
       <header class="phead">
         <figure>${pic(s.hero, { alt: s.title, eager: true, cls: "js-hero", style: `object-position:${s.focus}` })}</figure>
-        <button class="hint js-hint" type="button" aria-label="Voir la suite"><span>Découvrir</span><span class="hint__line" aria-hidden="true"></span></button>
+        ${HINT}
         <hgroup><h1 class="title title--xl" translate="no">${esc(s.title)}</h1><p>${esc(s.by)} · ${s.year}</p></hgroup>
         ${s.credit ? `<figcaption>© ${esc(s.credit)}</figcaption>` : ""}
       </header>
-      <div class="section wrap"><blockquote class="punch"><p>${esc(s.punch)}</p>${s.cite ? `<cite>${esc(s.cite)}</cite>` : ""}</blockquote></div>
-      ${s.poster ? `<div class="section wrap wrap--wide"><figure class="wide">${pic(s.poster, { alt: `Affiche de ${s.title}`, sizes: "(max-width: 56rem) 100vw, 50vw" })}</figure></div>` : ""}
-      <div class="section wrap"><div class="prose prose--justify">${s.text.map(p => `<p>${esc(p)}</p>`).join("")}</div></div>
-      <div class="section slider">
-        <div class="slider__items js-track">${s.slides.map(([f, alt]) => `<figure class="slide">${pic(f, { alt, sizes: "(max-width: 40em) 90vw, 45vw" })}</figure>`).join("")}</div>
-        ${s.slides.length > 1 ? `<div class="slider__nav"><button data-dir="-1" aria-label="Photo précédente">‹</button><button data-dir="1" aria-label="Photo suivante">›</button></div>` : ""}
-      </div>
-      <div class="section wrap"><div class="infos">${info.map(([k, v]) => `<p><b>${esc(k)} :</b> ${esc(v)}</p>`).join("")}</div>
-        ${s.pdf ? `<p class="section"><a href="${esc(s.pdf)}">Dossier de diffusion (PDF)</a></p>` : ""}</div>
-      <div class="section wrap"><h2 class="label">${upcoming ? "À venir" : "Représentations"}</h2>
-        ${datesTable(s.dates.map(d => `<tr><td>${fmtDay(d.day)}${d.time ? `, ${fmtTime(d.time)}` : ""}</td><td>${esc(place(d))}</td><td>${esc(d.price || "")}</td><td>${esc(d.country)}</td></tr>`))}
-        <a class="back" href="#/spectacles">← Tous les spectacles</a></div>
+      ${showSections(s)}
+      <div class="wrap"><a class="back" href="#/spectacles">← Tous les spectacles</a></div>
       ${footer()}</article>`;
-    const track = view.querySelector(".js-track");
-    view.querySelectorAll(".slider__nav button").forEach(b =>
-      b.addEventListener("click", () => track.scrollBy({ left: track.clientWidth * .6 * b.dataset.dir, behavior: "smooth" })));
+    wireSlider(view);
     return s.title;
   },
 
@@ -140,8 +170,8 @@ const pages = {
           <button class="pill" data-f="upcoming" aria-pressed="false">À venir</button>
           <button class="pill" data-f="all" aria-pressed="true">Tout</button>
           ${years.map(y => `<button class="pill" data-f="${y}" aria-pressed="false">${y}</button>`).join("")}
-          <label class="v-h" for="country">Pays</label>
-          <select class="pill" id="country"><option value="">Tous les pays</option>${countries.map(c => `<option>${esc(c)}</option>`).join("")}</select>
+          ${countries.length > 1 ? `<label class="v-h" for="country">Pays</label>
+          <select class="pill" id="country"><option value="">Tous les pays</option>${countries.map(c => `<option>${esc(c)}</option>`).join("")}</select>` : ""}
         </div>
         <div class="section js-list"></div>
       </div>${footer()}</section>`;
@@ -149,7 +179,7 @@ const pages = {
     let period = initial && (initial === "a-venir" || /^\d{4}$/.test(initial)) ? (initial === "a-venir" ? "upcoming" : initial) : "all";
     view.querySelectorAll("[data-f]").forEach(x => x.setAttribute("aria-pressed", x.dataset.f === period));
     const draw = () => {
-      const rows = all.filter(r => (period === "all" || (period === "upcoming" ? r.to >= today() : r.from.startsWith(period))) && (!country.value || r.country === country.value));
+      const rows = all.filter(r => (period === "all" || (period === "upcoming" ? r.to >= today() : r.from.startsWith(period))) && (!country || !country.value || r.country === country.value));
       list.innerHTML = rows.length
         ? datesTable(rows.map(r => `<tr><td>${fmtRange(r.from, r.to)}</td><td class="ev-title"><a href="#/spectacle/${r.show.slug}">${esc(r.show.title)}</a></td><td>${esc(r.place)}</td><td>${esc(r.country)}</td></tr>`))
         : `<p class="empty">Aucune date annoncée pour le moment.</p>`;
@@ -162,37 +192,65 @@ const pages = {
       history.replaceState(null, "", period === "all" ? "#/agenda" : `#/agenda/${period === "upcoming" ? "a-venir" : period}`);
       draw();
     }));
-    country.addEventListener("change", draw);
+    country?.addEventListener("change", draw);
     draw();
     return "Agenda";
   },
 
   compagnie(view){
+    const team = Object.keys(PEOPLE).filter(k => !PEOPLE[k].guest && !PEOPLE[k].montreal);
+    const belgianShows = k => projectsOf(k).filter(x => x.show.troupe === "bruxelles").map(x => x.show.title);
     view.innerHTML = `<article>
       <header class="phead">
-        <figure>${pic(BACKDROPS.compagnie, { alt: "Un comédien en chemise rouge, sur scène", eager: true, cls: "js-hero", style: "object-position:60% 35%" })}</figure>
-        <button class="hint js-hint" type="button" aria-label="Voir la suite"><span>Découvrir</span><span class="hint__line" aria-hidden="true"></span></button>
-        <hgroup><h1 class="title title--xl">La compagnie</h1><p>Bruxelles · Montréal, depuis 2018</p></hgroup>
+        <figure>${pic(BACKDROPS.compagnie, { alt: "Portrait en coulisses", eager: true, cls: "js-hero", style: "object-position:50% 30%" })}</figure>
+        ${HINT}
+        <hgroup><h1 class="title title--xl">La compagnie</h1><p>Bruxelles, depuis 2018</p></hgroup>
       </header>
       <div class="section wrap"><p class="punch">Des spectacles inédits et originaux, et 1001 sensations. Car la Compagnie Cliffhanger, c'est une histoire sans fin.</p></div>
       <div class="section wrap"><div class="prose prose--justify">
         <p>Créée en 2018 dans les locaux de l'ULB par des passionnés de littérature, de théâtre et d'improvisation, la Compagnie Cliffhanger s'est d'abord fait remarquer avec une adaptation audacieuse des <em>Femmes savantes</em> de Molière, réinventée à la manière d'une sitcom des années 1980.</p>
-        <p>Après la crise du COVID, la troupe a retrouvé le chemin des planches avec <em>Par Endroits</em>, une création originale. Parallèlement, la compagnie s'est développée outre-Atlantique grâce à l'un de ses membres fondateurs, donnant naissance à un collectif-sœur au Québec, dont les liens perdurent aujourd'hui.</p>
-        <p><strong>« Avancer plus loin, ensemble, au rythme de nos différences. »</strong></p>
-      </div></div>
-      <div class="section wrap wrap--wide"><div class="cols">
-        <div><h2 class="title">Bruxelles</h2><p class="sub">Compagnie Cliffhanger, depuis 2018</p><p><em>Les Femmes Se Vantent</em> (2019), <em>Par Endroits</em> (2024), <em>L'Inédit de Molière</em> (2026).</p></div>
-        <div><h2 class="title">Montréal</h2><p class="sub">Collectif Cliffhanger, collectif-sœur</p><p><em>Hamlet</em>, tragicomédie dans les années 1950 (2020, interrompu par le Covid), <em>Un C(h)œur silencieux</em> (2025, Place des Arts).</p></div>
+        <p>Après la crise du COVID, la troupe a retrouvé le chemin des planches avec <em>Par Endroits</em>, une création originale, puis avec <em>L'Inédit de Molière</em>. Parallèlement, la compagnie s'est développée outre-Atlantique grâce à l'un de ses membres fondateurs, donnant naissance à un <a class="person" href="#/montreal">collectif-sœur à Montréal</a>, dont les liens perdurent aujourd'hui.</p>
       </div></div>
       <div class="section wrap"><h2 class="label">L'équipe</h2>
-        <div class="table-wrap"><table class="events events--team"><tbody>${TEAM.map(([n, r]) => `<tr><td>${esc(n)}</td><td>${esc(r)}</td></tr>`).join("")}</tbody></table></div>
+        <div class="table-wrap"><table class="events events--team"><tbody>${team.map(k => `<tr><td>${personLink(k)}</td><td>${esc(joinFr(belgianShows(k)))}</td></tr>`).join("")}</tbody></table></div>
       </div>
       ${footer()}</article>`;
     return "La compagnie";
   },
 
+  montreal(view){
+    const s = SHOWS.find(x => x.troupe === "montreal");
+    view.innerHTML = `<article>
+      <header class="phead">
+        <figure>${pic(s.hero, { alt: s.title, eager: true, cls: "js-hero", style: `object-position:${s.focus}` })}</figure>
+        ${HINT}
+        <hgroup><h1 class="title title--xl">Montréal</h1><p>Collectif Cliffhanger, collectif-sœur</p></hgroup>
+      </header>
+      <div class="section wrap"><p class="punch">${esc(MONTREAL.lead)}</p></div>
+      <div class="section wrap"><div class="prose prose--justify">${MONTREAL.text.map(p => `<p>${esc(p)}</p>`).join("")}</div></div>
+      <div class="section wrap"><h2 class="title title--xl title--page">${esc(s.title)}</h2><p class="sub">${s.year}</p></div>
+      ${showSections(s)}
+      ${footer()}</article>`;
+    wireSlider(view);
+    return "Montréal";
+  },
+
+  personne(view, key){
+    const who = PEOPLE[key];
+    if (!who) { location.replace("#/compagnie"); return; }
+    const projects = projectsOf(key);
+    view.innerHTML = `<section class="page"><div class="wrap">
+      <h1 class="title title--xl title--page">${esc(who.name)}</h1>
+      <div class="section"><h2 class="label">Projets</h2>
+        ${datesTable(projects.map(x => `<tr><td>${x.show.year}</td><td class="ev-title"><a href="${showHref(x.show)}">${esc(x.show.title)}</a></td><td>${esc(x.roles.join(", "))}</td></tr>`))}</div>
+      ${who.bio ? `<div class="section"><h2 class="label">Biographie</h2><div class="prose prose--justify">${who.bio.map(p => `<p>${esc(p)}</p>`).join("")}</div></div>` : ""}
+      <a class="back" href="#/compagnie">← La compagnie</a>
+    </div>${footer()}</section>`;
+    return who.name;
+  },
+
   galerie(view, initial){
-    const cats = [["all", "Tout"], ...SHOWS.filter(s => GALLERY.some(g => g[2] === s.slug)).map(s => [s.slug, s.title]), ["coulisses", "Coulisses"]];
+    const cats = [["all", "Tout"], ...BELGIUM.filter(s => GALLERY.some(g => g[2] === s.slug)).map(s => [s.slug, s.title]), ["coulisses", "Coulisses"]];
     view.innerHTML = `<section class="page"><div class="wrap wrap--wide">
       <h1 class="title title--xl title--page">Galerie</h1>
       <div class="pills" role="group" aria-label="Filtrer par spectacle">${cats.map(([k, l], i) => `<button class="pill" data-g="${k}" aria-pressed="${i === 0}">${esc(l)}</button>`).join("")}</div>

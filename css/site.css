@@ -124,6 +124,9 @@ a,button,select{touch-action:manipulation;-webkit-tap-highlight-color:transparen
 .prose strong,.infos b{font-weight:500}
 .label{margin-bottom:.5rem;font-size:1.25rem;font-weight:400;text-transform:uppercase}
 .infos{display:grid;gap:.35rem;line-height:1.5}
+.person{border-bottom:.0625rem solid rgba(255,255,255,.35);transition:border-color .25s}
+.person:hover,.person:focus-visible{border-color:var(--front)}
+.sub{margin-top:.5rem;font-size:1.25rem;font-weight:400;opacity:.75}
 .back{display:inline-block;margin-top:2rem;opacity:.75}
 .back:hover,.back:focus-visible{opacity:1}
 
