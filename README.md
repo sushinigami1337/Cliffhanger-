@@ -3,7 +3,7 @@
 Salut Brendan. Ce dépôt contient le **prototype fonctionnel** du site, fait pour montrer le projet à la compagnie. Il n'est pas figé : c'est une référence vivante pour les contenus, les images et surtout les animations. Tu es libre de repartir de zéro sur ta stack.
 
 - **Aperçu à jour :** https://claude.ai/artifact/M9ZnDW6T1xgfJ7WUvcpb4u (la démo https://compagnie-cliffhanger.netlify.app est mise à jour moins souvent)
-- **Maquettes Figma :** https://www.figma.com/design/vP8Z0mWn7ytbZk3IoL3Z6u (page « Site · maquettes (V2) » : desktop, états, mobile et captures du vrai site en téléphone et tablette ; puis « Notes pour Brendan » et « Guide dev »)
+- **Maquettes Figma :** https://www.figma.com/design/vP8Z0mWn7ytbZk3IoL3Z6u (page « Site · maquettes (V2) » : desktop 1440, états, téléphone 390 et tablette 820 pour toutes les pages ; puis « Notes pour Brendan » et « Guide dev »)
 - **Référence de style :** https://www.focusandchaliwate.be/fr (le système a été relevé dans leur CSS)
 - **Originaux des médias :** Google Drive de la compagnie, dossier `CLIFFHANGER/03_MEDIAS` (accès via Hans)
 
