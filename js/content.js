@@ -112,6 +112,7 @@ const SHOWS = [
     slides: [["pull", "Les Femmes Se Vantent"], ["affiche-fsv", "Affiche"]],
     credits: [
       { role: "D'après", text: "Les Femmes savantes, de Molière" },
+      { role: "Mise en scène", text: "collective" },
       { role: "Avec", people: [["sophie-decaestecker", "Henriette"], ["hans-melot", "Clitandre"], ["laurie-stevens", "la mère"], ["alexandre-van-campenhout", "Chrysale"], ["audrey-colomb", "Armande"], ["alize-cookie", "Bélise"], ["julie-gloesener", "la tante"], ["nathan-leclercq", "Trissotin"]] },
     ],
     dates: [
